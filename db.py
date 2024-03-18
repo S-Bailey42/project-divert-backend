@@ -4,7 +4,6 @@ from uuid import uuid4
 from sqlalchemy import create_engine
 import asyncio
 Base = declarative_base()
-engine = create_engine("sqlite:///./app.db")
 
 
 #def _fk_pragma_on_connect(dbapi_con, con_record):
@@ -114,7 +113,7 @@ class Site(Base): #
 
 class Password(Base): #
     __tablename__ = "Password"
-    id = Column(Integer, ForeignKey("User.id"), primary_key=True)
+    id = Column(String, ForeignKey("User.id"), primary_key=True)
     Content = Column(BLOB)
 
     user = relationship('User', foreign_keys='Password.id')
