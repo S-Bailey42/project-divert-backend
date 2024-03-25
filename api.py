@@ -95,7 +95,7 @@ async def create_account(session: AsyncSession, user_obj: dbTypes.NewUser, passw
         raise HTTPException(HTTPStatus.NOT_FOUND, "cannot find userType")
     if userType.Name.lower() != "admin":
         if not validate_email(user_obj.Email):
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "Invaild email2")
+            raise HTTPException(HTTPStatus.BAD_REQUEST, "Invaild email")
 
     pw_hash = hashing.password(password)
     new_user = Table.User(Email=user_obj.Email, UserTypeID=user_obj.UserTypeID)
