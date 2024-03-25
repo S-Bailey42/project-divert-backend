@@ -14,7 +14,9 @@ from sqlalchemy import select
 import hashing
 import asyncio
 from http import HTTPStatus
-#Base.metadata.create_all(engine)
+
+
+
 
 class DatabaseSessionManager:
     def __init__(self, host: str, engine_kwargs: dict[str, Any] = {}):
@@ -60,14 +62,13 @@ class DatabaseSessionManager:
 
 sessionmanager = DatabaseSessionManager("sqlite+aiosqlite:///./app.db")
 
+
 async def get_db_session():
     async with sessionmanager.session() as session:
         yield session
 
+
 DBSession = Annotated[AsyncSession, Depends(get_db_session)]
-
-
-
 
 
 async def check_if_user_exists(email: str, session: AsyncSession) -> bool:
@@ -78,14 +79,14 @@ async def check_if_user_exists(email: str, session: AsyncSession) -> bool:
     return False
 
 
-async def create_account(session: AsyncSession, email: str, userType: int, password ):
+async def create_account(session: AsyncSession, email: str, userType: int, password):
     if not password:
         return None
-    if  (await check_if_user_exists(email, session)):
+    if await check_if_user_exists(email, session):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Invaild email")
-    
+
     if not (await session.get(Table.UserType, userType)):
-        raise HTTPException(HTTPStatus.NOT_FOUND, "cannot find userType") 
+        raise HTTPException(HTTPStatus.NOT_FOUND, "cannot find userType")
 
     pw_hash = hashing.password(password)
     new_user = Table.User(Email=email, UserTypeID=userType)
@@ -96,6 +97,7 @@ async def create_account(session: AsyncSession, email: str, userType: int, passw
     await session.commit()
     return new_user
 
+
 async def get_user_by_email(email: str, session: AsyncSession) -> Table.User:
     stmt = select(Table.User).where(Table.User.Email == email)
     ret = (await session.execute(stmt)).scalar()
@@ -105,19 +107,13 @@ async def get_user_by_email(email: str, session: AsyncSession) -> Table.User:
     return ret
 
 
-
 async def authenticate_user(db_session: AsyncSession, email: str, pw: str):
     user_obj = await get_user_by_email(email, db_session)
-    
+
     password_obj = await db_session.get(Table.Password, user_obj.id)
     if password_obj == None:
         raise HTTPException(HTTPStatus.NOT_FOUND, "cannot find email and/or password")
     return hashing.check(pw, password_obj.Content)
-        
-        
 
 
-    
-
-
-#asyncio.run(main())
+# asyncio.run(main())
