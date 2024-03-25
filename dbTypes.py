@@ -9,3 +9,10 @@ class User(BaseModel):
     Email: str
     UserTypeID: int
     PhoneNumber: Optional[str]
+
+class NewUser(BaseModel):
+    Name: str
+    Email: str
+    CharityNumber: Optional[int]
+    UserTypeID: int
+    PhoneNumber: Optional[str]

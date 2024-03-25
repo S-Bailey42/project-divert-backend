@@ -40,7 +40,8 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)], session: DBSession
+    token: Annotated[str, Depends(oauth2_scheme)], 
+    session: DBSession
 ):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -54,14 +55,32 @@ async def get_current_user(
         raise expectionTypes.Incorrect_email_password
     return user
 
+LoginUserInfo = Annotated[dbTypes.User, Depends(get_current_user)]
+
+
+async def admin_user(
+    user: LoginUserInfo,
+    session: DBSession
+):
+    userType = (await session.get(Table.UserType, user.UserTypeID))
+    
+    if userType:
+        if userType.Name.lower() != "admin":
+            raise expectionTypes.incorrect_level_of_access
+    else:
+        raise expectionTypes.Invaild_value("UserTypeID", user.UserTypeID)
+
+AdminUser = Annotated[dbTypes.User, Depends(admin_user)]
+#RequireAdmin = Annotated[dbTypes.User, Depends(get_current_user)]
+
 
 @UserRouter.get("/about")
-async def About_user(user: Annotated[dbTypes.User, Depends(get_current_user)]):
+async def About_user(user: LoginUserInfo):
     return user
 
 
 @AuthRouter.post("/login")
-async def Login_user(
+async def loginUser(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db_session: DBSession
 ):
 
@@ -76,12 +95,20 @@ async def Login_user(
     )
     return Token(access_token=access_token, token_type="bearer")
 
-
+# Just to note here, the return of this function is the user's password 
+# which will not be shown again to the admin.
+# TODO: the database and api needs to be updated to surport this.
+# On first time login, it will require the user to reset the password
 @AuthRouter.post("/signup")
-async def Signup_user(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db_session: DBSession
+async def createUser(
+    newUser: dbTypes.NewUser,
+    admin: AdminUser,
+    db_session: DBSession
 ):
-    pass
+    return await create_account(
+        session=db_session,
+        user_obj=newUser
+        )
 
 
 app.include_router(WorkSiteRouter)

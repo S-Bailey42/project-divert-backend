@@ -6,6 +6,12 @@ import asyncio
 
 Base = declarative_base()
 
+def to_dict(object):
+    
+    return_dict = object.__dict__.copy()
+    del return_dict["_sa_instance_state"]
+    #print(object.__dict__)
+    return return_dict
 
 # def _fk_pragma_on_connect(dbapi_con, con_record):
 #    dbapi_con.execute('pragma foreign_keys=ON')

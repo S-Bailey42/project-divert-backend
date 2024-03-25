@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-
+from fastapi.encoders import jsonable_encoder
 from fastapi import Depends, HTTPException
 from typing import Annotated
 import contextlib
@@ -14,8 +14,11 @@ from sqlalchemy import select
 import hashing
 import asyncio
 from http import HTTPStatus
-
-
+import secrets
+from typing import Optional
+import dbTypes
+def passwordGen() -> str:
+    return secrets.token_urlsafe(16)
 
 
 class DatabaseSessionManager:
@@ -79,23 +82,24 @@ async def check_if_user_exists(email: str, session: AsyncSession) -> bool:
     return False
 
 
-async def create_account(session: AsyncSession, email: str, userType: int, password):
+async def create_account(session: AsyncSession, user_obj: dbTypes.NewUser, password: Optional[str] = None):
     if not password:
-        return None
-    if await check_if_user_exists(email, session):
+        password = passwordGen()
+    if await check_if_user_exists(user_obj.Email, session):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Invaild email")
 
-    if not (await session.get(Table.UserType, userType)):
+    if not (await session.get(Table.UserType, user_obj.UserTypeID)):
         raise HTTPException(HTTPStatus.NOT_FOUND, "cannot find userType")
 
     pw_hash = hashing.password(password)
-    new_user = Table.User(Email=email, UserTypeID=userType)
+    new_user = Table.User(Email=user_obj.Email, UserTypeID=user_obj.UserTypeID)
     session.add(new_user)
     await session.commit()
     await session.refresh(new_user)
     session.add(Table.Password(id=new_user.id, Content=pw_hash))
     await session.commit()
-    return new_user
+    await session.refresh(new_user)
+    return {**Table.to_dict(new_user), "password":password}
 
 
 async def get_user_by_email(email: str, session: AsyncSession) -> Table.User:
