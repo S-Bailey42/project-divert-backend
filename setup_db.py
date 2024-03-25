@@ -4,7 +4,7 @@ import asyncio
 import db
 import pathlib
 import os
-
+import dbTypes
 
 async def main():
     db_file = "./app.db"
@@ -22,7 +22,16 @@ async def main():
         for t in userTypes:
             session.add(db.UserType(Name=t))
         await session.commit()
-        await create_account(session, "admin", 3, admin_json["password"])
+
+
+        admin_account = dbTypes.NewUser(
+            Name="admin",
+            Email="admin",
+            CharityNumber = None,
+            UserTypeID = 3,
+            PhoneNumber = None
+        ) 
+        await create_account(session, admin_account, admin_json["password"])
 
 
 if __name__ == "__main__":
