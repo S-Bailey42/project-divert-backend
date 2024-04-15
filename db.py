@@ -175,5 +175,12 @@ class ItemInterest(Base):
     item = relationship("Item", foreign_keys="ItemInterest.ItemID")
     user = relationship("User", foreign_keys="ItemInterest.UserID")
 
+class RequestAccount(Base):
+    __tablename__ = "RequestAccount"
+    id = Column(Integer, primary_key=True)
+    companyName = Column(String)
+    email = Column(String)
+    userType = Column(Integer, ForeignKey("UserType.id"))
+
 
 # Base.metadata.create_all(engine)

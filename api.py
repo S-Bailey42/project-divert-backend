@@ -17,7 +17,7 @@ from http import HTTPStatus
 import secrets
 from typing import Optional
 import dbTypes
-from validate_email import validate_email
+#from validate_email import validate_email
 def passwordGen() -> str:
     return secrets.token_urlsafe(16)
 
@@ -93,9 +93,9 @@ async def create_account(session: AsyncSession, user_obj: dbTypes.NewUser, passw
 
     if not (userType := await session.get(Table.UserType, user_obj.UserTypeID)):
         raise HTTPException(HTTPStatus.NOT_FOUND, "cannot find userType")
-    if userType.Name.lower() != "admin":
-        if not validate_email(user_obj.Email):
-            raise HTTPException(HTTPStatus.BAD_REQUEST, "Invaild email")
+    #if userType.Name.lower() != "admin":
+    #    if not validate_email(user_obj.Email):
+    #        raise HTTPException(HTTPStatus.BAD_REQUEST, "Invaild email")
 
     pw_hash = hashing.password(password)
     new_user = Table.User(Email=user_obj.Email, UserTypeID=user_obj.UserTypeID)

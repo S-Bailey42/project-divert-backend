@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -8,8 +8,17 @@ import expectionTypes
 from api import *
 import asyncio
 import dbTypes
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from starlette.requests import Request
 
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
 SECRET_KEY = "915589d3081478a34902d6a9454bfbfda1de3ce24f19f20d64ec3015b5d65adb982fc42470ed0fa6ac5060fbeb30346b8f192210295d828a7e2918c187e5dd27"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -21,12 +30,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 WorkSiteRouter = APIRouter(prefix="/worksite")
 AuthRouter = APIRouter(prefix="/auth")
 UserRouter = APIRouter(prefix="/user")
+RequestRouter = APIRouter(prefix="/request")
 
+EMAIL_re = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$" 
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+class requestAccount(BaseModel):
+    companyName: str
+    email: str = Field(pattern=EMAIL_re)
+    userType: str
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
@@ -110,7 +125,12 @@ async def createUser(
         user_obj=newUser
         )
 
+@RequestRouter.post("/account")
+@limiter.limit("5/minute")
+def getAccount(request: Request, data: requestAccount,db_session: DBSession):
+    pass
 
 app.include_router(WorkSiteRouter)
 app.include_router(AuthRouter)
 app.include_router(UserRouter)
+app.include_router(RequestRouter)
