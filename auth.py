@@ -49,18 +49,17 @@ async def get_current_user(
 
 LoginUserInfo = Annotated[dbTypes.User, Depends(get_current_user)]
 
+class PermissionSystem:
+    def __init__(self, *users: str):
+        self.users = users
 
-async def admin_user(
-    user: LoginUserInfo,
-    session: DBSession
-):
-    userType = (await session.get(Table.UserType, user.UserTypeID))
-    
-    if userType:
-        if userType.Name.lower() != "admin":
-            raise expectionTypes.incorrect_level_of_access
-    else:
-        raise expectionTypes.Invaild_value("UserTypeID", user.UserTypeID)
+    async def __call__(self, user: LoginUserInfo,session: DBSession):
+        userType = (await session.get(Table.UserType, user.UserTypeID))
+        if userType:
+            if userType.Name not in self.users:
+                raise expectionTypes.incorrect_level_of_access
+        else:
+            raise expectionTypes.Invaild_value("UserTypeID", user.UserTypeID)
     
 class Token(BaseModel):
     access_token: str
@@ -73,4 +72,9 @@ def create_token(form_data: OAuth2PasswordRequestForm) -> Token:
     )
     return Token(access_token=access_token, token_type="bearer")
 
-AdminUser = Annotated[dbTypes.User, Depends(admin_user)]
+def permissionGroup(*users: str):
+    return Annotated[dbTypes.User, Depends(PermissionSystem(*users))]
+
+AdminUser = permissionGroup("Admin")
+BeneficiaryUser = permissionGroup("Beneficiary", "Admin")
+ConstructionUser = permissionGroup("Construction", "Admin")
