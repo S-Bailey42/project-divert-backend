@@ -10,6 +10,6 @@ def test(func, *args, **kwargs):
 if __name__ == "__main__":
     #wow = test(print, "nice", "day", sep="@")
     
-    main = partial(uvicorn.run, "app:app")
+    main = partial(uvicorn.run, "app:app", reload=True)
     
     fire.Fire(main)

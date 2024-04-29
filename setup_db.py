@@ -14,7 +14,7 @@ async def main():
     async with sessionmanager._engine.begin() as connection:
         await connection.run_sync(Table.Base.metadata.create_all)
 
-    userTypes = ("Worker", "Charity", "Admin")
+    userTypes = ("Construction", "Beneficiary", "Admin")
     with open("admin.json", "r") as f:
         admin_json = json.load(f)
 
