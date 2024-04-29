@@ -1,0 +1,369 @@
+[
+  {
+    "Coordinates": "51.5074° N, 0.1278° W",
+    "Address": "10 Downing Street",
+    "Postcode": "SW1A 2AA",
+    "SiteManager": "John Doe",
+    "PhoneNumber": "123-456-7890",
+    "Email": "john.doe@example.com",
+    "StartDate": "2024-05-01T08:00:00Z",
+    "EndDate": "2024-05-31T17:00:00Z"
+  },
+  {
+    "Coordinates": "40.7128° N, 74.0060° W",
+    "Address": "1600 Pennsylvania Avenue NW",
+    "Postcode": "20500",
+    "SiteManager": "Jane Smith",
+    "PhoneNumber": "987-654-3210",
+    "Email": "jane.smith@example.com",
+    "StartDate": "2024-05-05T08:00:00Z",
+    "EndDate": "2024-05-30T17:00:00Z"
+  },
+  {
+    "Coordinates": "48.8566° N, 2.3522° E",
+    "Address": "Eiffel Tower",
+    "Postcode": "75007",
+    "SiteManager": "Michael Johnson",
+    "PhoneNumber": "456-789-0123",
+    "Email": "michael.johnson@example.com",
+    "StartDate": "2024-05-10T08:00:00Z",
+    "EndDate": "2024-06-10T17:00:00Z"
+  },
+  {
+    "Coordinates": "35.6895° N, 139.6917° E",
+    "Address": "Tokyo Tower",
+    "Postcode": "105-0011",
+    "SiteManager": "Emily Brown",
+    "PhoneNumber": "789-012-3456",
+    "Email": "emily.brown@example.com",
+    "StartDate": "2024-05-15T08:00:00Z",
+    "EndDate": "2024-06-15T17:00:00Z"
+  },
+  {
+    "Coordinates": "34.0522° N, 118.2437° W",
+    "Address": "1750 Vine St, Los Angeles",
+    "Postcode": "90028",
+    "SiteManager": "Alex Lee",
+    "PhoneNumber": "321-654-9870",
+    "Email": "alex.lee@example.com",
+    "StartDate": "2024-05-20T08:00:00Z",
+    "EndDate": "2024-06-20T17:00:00Z"
+  },
+  {
+    "Coordinates": "51.5074° N, 0.1278° W",
+    "Address": "Westminster Abbey",
+    "Postcode": "SW1P 3PA",
+    "SiteManager": "Sophia Davis",
+    "PhoneNumber": "654-987-0123",
+    "Email": "sophia.davis@example.com",
+    "StartDate": "2024-05-25T08:00:00Z",
+    "EndDate": "2024-06-25T17:00:00Z"
+  },
+  {
+    "Coordinates": "41.8902° N, 87.6324° W",
+    "Address": "875 N Michigan Ave, Chicago",
+    "Postcode": "60611",
+    "SiteManager": "David Wilson",
+    "PhoneNumber": "012-345-6789",
+    "Email": "david.wilson@example.com",
+    "StartDate": "2024-05-30T08:00:00Z",
+    "EndDate": "2024-06-30T17:00:00Z"
+  },
+  {
+    "Coordinates": "40.7128° N, 74.0060° W",
+    "Address": "Statue of Liberty",
+    "Postcode": "10004",
+    "SiteManager": "Olivia Miller",
+    "PhoneNumber": "987-654-3210",
+    "Email": "olivia.miller@example.com",
+    "StartDate": "2024-06-01T08:00:00Z",
+    "EndDate": "2024-07-01T17:00:00Z"
+  },
+  {
+    "Coordinates": "34.0522° N, 118.2437° W",
+    "Address": "Disneyland, Anaheim",
+    "Postcode": "92802",
+    "SiteManager": "William Harris",
+    "PhoneNumber": "654-321-0987",
+    "Email": "william.harris@example.com",
+    "StartDate": "2024-06-05T08:00:00Z",
+    "EndDate": "2024-07-05T17:00:00Z"
+  },
+  {
+    "Coordinates": "51.1789° N, 0.6170° E",
+    "Address": "Stonehenge",
+    "Postcode": "SP4 7DE",
+    "SiteManager": "Ella Thompson",
+    "PhoneNumber": "321-098-7654",
+    "Email": "ella.thompson@example.com",
+    "StartDate": "2024-06-10T08:00:00Z",
+    "EndDate": "2024-07-10T17:00:00Z"
+  },
+  {
+    "Coordinates": "37.7749° N, 122.4194° W",
+    "Address": "Golden Gate Bridge",
+    "Postcode": "94129",
+    "SiteManager": "Jacob Martinez",
+    "PhoneNumber": "012-345-6789",
+    "Email": "jacob.martinez@example.com",
+    "StartDate": "2024-06-15T08:00:00Z",
+    "EndDate": "2024-07-15T17:00:00Z"
+  },
+  {
+    "Coordinates": "55.7558° N, 37.6173° E",
+    "Address": "Red Square",
+    "Postcode": "109012",
+    "SiteManager": "Emma Wilson",
+    "PhoneNumber": "789-012-3456",
+    "Email": "emma.wilson@example.com",
+    "StartDate": "2024-06-20T08:00:00Z",
+    "EndDate": "2024-07-20T17:00:00Z"
+  },
+  {
+    "Coordinates": "35.6895° N, 139.6917° E",
+    "Address": "Shibuya Crossing",
+    "Postcode": "150-0041",
+    "SiteManager": "Daniel Garcia",
+    "PhoneNumber": "987-654-3210",
+    "Email": "daniel.garcia@example.com",
+    "StartDate": "2024-06-25T08:00:00Z",
+    "EndDate": "2024-07-25T17:00:00Z"
+  },
+  {
+    "Coordinates": "40.6892° N, 74.0445° W",
+    "Address": "Times Square",
+    "Postcode": "10036",
+    "SiteManager": "Sophie Brown",
+    "PhoneNumber": "321-654-9870",
+    "Email": "sophie.brown@example.com",
+    "StartDate": "2024-06-30T08:00:00Z",
+    "EndDate": "2024-07-30T17:00:00Z"
+  },
+  {
+    "Coordinates": "34.0522° N, 118.2437° W",
+    "Address": "Hollywood Walk of Fame",
+    "Postcode": "90028",
+    "SiteManager": "James White",
+    "PhoneNumber": "012-345-6789",
+    "Email": "james.white@example.com",
+    "StartDate": "2024-07-01T08:00:00Z",
+    "EndDate": "2024-08-01T17:00:00Z"
+  },
+  {
+    "Coordinates": "37.7749° N, 122.4194° W",
+    "Address": "Alcatraz Island",
+    "Postcode": "94133",
+    "SiteManager": "Liam Johnson",
+    "PhoneNumber": "987-654-3210",
+    "Email": "liam.johnson@example.com",
+    "StartDate": "2024-07-05T08:00:00Z",
+    "EndDate": "2024-08-05T17:00:00Z"
+  },
+  {
+    "Coordinates": "41.9028° N, 12.4964° E",
+    "Address": "Colosseum",
+    "Postcode": "00184",
+    "SiteManager": "Ava Smith",
+    "PhoneNumber": "321-654-9870",
+    "Email": "ava.smith@example.com",
+    "StartDate": "2024-07-10T08:00:00Z",
+    "EndDate": "2024-08-10T17:00:00Z"
+  },
+  {
+    "Coordinates": "48.8584° N, 2.2945° E",
+    "Address": "Louvre Museum",
+    "Postcode": "75001",
+    "SiteManager": "Mia Johnson",
+    "PhoneNumber": "012-345-6789",
+    "Email": "mia.johnson@example.com",
+    "StartDate": "2024-07-15T08:00:00Z",
+    "EndDate": "2024-08-15T17:00:00Z"
+  },
+  {
+    "Coordinates": "40.4319° N, 3.7039° W",
+    "Address": "Plaza Mayor, Madrid",
+    "Postcode": "28012",
+    "SiteManager": "Noah Brown",
+    "PhoneNumber": "987-654-3210",
+    "Email": "noah.brown@example.com",
+    "StartDate": "2024-07-20T08:00:00Z",
+    "EndDate": "2024-08-20T17:00:00Z"
+  },
+  {
+    "Coordinates": "51.1789° N, 0.6170° E",
+    "Address": "Canterbury Cathedral",
+    "Postcode": "CT1 2EH",
+    "SiteManager": "Isabella Wilson",
+    "PhoneNumber": "321-654-9870",
+    "Email": "isabella.wilson@example.com",
+    "StartDate": "2024-07-25T08:00:00Z",
+    "EndDate": "2024-08-25T17:00:00Z"
+  }
+]
+
+
+[
+    {
+      "name": "Chair",
+      "siteID": "1",
+      "itemTypeID": 5,
+      "quantity": 10,
+      "kgPerItem": 5,
+      "carbon": 0,
+      "dimensions": "50x50x90 cm"
+    },
+    {
+      "name": "Table",
+      "siteID": "2",
+      "itemTypeID": 8,
+      "quantity": 5,
+      "kgPerItem": 15,
+      "carbon": 0,
+      "dimensions": "120x80x75 cm"
+    },
+    {
+      "name": "Bookshelf",
+      "siteID": "3",
+      "itemTypeID": 2,
+      "quantity": 3,
+      "kgPerItem": 20,
+      "carbon": 0,
+      "dimensions": "80x30x180 cm"
+    },
+    {
+      "name": "Lamp",
+      "siteID": "4",
+      "itemTypeID": 10,
+      "quantity": 8,
+      "kgPerItem": 2,
+      "carbon": 0,
+      "dimensions": "30x30x60 cm"
+    },
+    {
+      "name": "Desk",
+      "siteID": "5",
+      "itemTypeID": 6,
+      "quantity": 6,
+      "kgPerItem": 25,
+      "carbon": 0,
+      "dimensions": "120x60x75 cm"
+    },
+    {
+      "name": "Sofa",
+      "siteID": "6",
+      "itemTypeID": 3,
+      "quantity": 2,
+      "kgPerItem": 40,
+      "carbon": 0,
+      "dimensions": "200x100x80 cm"
+    },
+    {
+      "name": "Cabinet",
+      "siteID": "7",
+      "itemTypeID": 7,
+      "quantity": 4,
+      "kgPerItem": 30,
+      "carbon": 0,
+      "dimensions": "100x50x150 cm"
+    },
+    {
+      "name": "Bed",
+      "siteID": "8",
+      "itemTypeID": 4,
+      "quantity": 2,
+      "kgPerItem": 50,
+      "carbon": 0,
+      "dimensions": "180x200x40 cm"
+    },
+    {
+      "name": "Mirror",
+      "siteID": "9",
+      "itemTypeID": 12,
+      "quantity": 10,
+      "kgPerItem": 3,
+      "carbon": 0,
+      "dimensions": "40x60 cm"
+    },
+    {
+      "name": "Rug",
+      "siteID": "10",
+      "itemTypeID": 1,
+      "quantity": 3,
+      "kgPerItem": 8,
+      "carbon": 0,
+      "dimensions": "150x200 cm"
+    },
+    {
+      "name": "Painting",
+      "siteID": "11",
+      "itemTypeID": 11,
+      "quantity": 5,
+      "kgPerItem": 1,
+      "carbon": 0,
+      "dimensions": "60x80 cm"
+    },
+    {
+      "name": "Plant",
+      "siteID": "12",
+      "itemTypeID": 9,
+      "quantity": 12,
+      "kgPerItem": 2,
+      "carbon": 0,
+      "dimensions": "20x20x40 cm"
+    },
+    {
+      "name": "Desk Chair",
+      "siteID": "13",
+      "itemTypeID": 5,
+      "quantity": 8,
+      "kgPerItem": 7,
+      "carbon": 0,
+      "dimensions": "50x50x90 cm"
+    },
+    {
+      "name": "Coffee Table",
+      "siteID": "14",
+      "itemTypeID": 8,
+      "quantity": 4,
+      "kgPerItem": 12,
+      "carbon": 0,
+      "dimensions": "80x80x45 cm"
+    },
+    {
+      "name": "Filing Cabinet",
+      "siteID": "15",
+      "itemTypeID": 7,
+      "quantity": 5,
+      "kgPerItem": 35,
+      "carbon": 0,
+      "dimensions": "50x50x120 cm"
+    },
+    {
+      "name": "Armchair",
+      "siteID": "16",
+      "itemTypeID": 3,
+      "quantity": 3,
+      "kgPerItem": 30,
+      "carbon": 0,
+      "dimensions": "90x90x80 cm"
+    },
+    {
+      "name": "Side Table",
+      "siteID": "17",
+      "itemTypeID": 8,
+      "quantity": 6,
+      "kgPerItem": 8,
+      "carbon": 0,
+      "dimensions": "40x40x50 cm"
+    },
+    {
+      "name": "Bookcase",
+      "siteID": "18",
+      "itemTypeID": 2,
+      "quantity": 4,
+      "kgPerItem": 25,
+      "carbon": 0,
+      "dimensions": "120x30x180 cm"
+    }
+  ]
+  
