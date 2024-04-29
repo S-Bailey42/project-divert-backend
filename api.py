@@ -84,8 +84,6 @@ async def check_if_user_exists(email: str, session: AsyncSession) -> bool:
 
 
 async def create_account(session: AsyncSession, user_obj: dbTypes.NewUser, password: Optional[str] = None):
-    
-    
     if not password:
         password = passwordGen()
     if await check_if_user_exists(user_obj.Email, session):
