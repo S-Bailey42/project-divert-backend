@@ -62,14 +62,11 @@ async def get_current_user(
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
-            print("1")
             raise expectionTypes.Incorrect_email_password
     except JWTError:
-        print("2")
         raise expectionTypes.Incorrect_email_password
     user = await get_user_by_email(username, session)
     if user is None:
-        print("3")
         raise expectionTypes.Incorrect_email_password
     return user
 

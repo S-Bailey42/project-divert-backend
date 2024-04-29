@@ -112,7 +112,6 @@ async def get_user_by_email(email: str, session: AsyncSession) -> Table.User:
     stmt = select(Table.User).where(Table.User.Email == email)
     ret = (await session.execute(stmt)).scalar()
     if ret == None:
-        print("nice")
         raise HTTPException(HTTPStatus.NOT_FOUND, "cannot find email and/or password")
 
     return ret
@@ -123,7 +122,6 @@ async def authenticate_user(db_session: AsyncSession, email: str, pw: str):
 
     password_obj = await db_session.get(Table.Password, user_obj.id)
     if password_obj == None:
-        print("10")
         raise HTTPException(HTTPStatus.NOT_FOUND, "cannot find email and/or password")
     return hashing.check(pw, password_obj.Content)
 
