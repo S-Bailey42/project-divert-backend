@@ -5,4 +5,5 @@ python-jose[cryptography]==3.3.0
 SQLAlchemy==2.0.29
 aiosqlite==0.20.0
 bcrypt==4.1.2
-slowapi 
+slowapi
+fire
