@@ -75,6 +75,6 @@ def create_token(form_data: OAuth2PasswordRequestForm) -> Token:
 def permissionGroup(*users: str):
     return Annotated[dbTypes.User, Depends(PermissionSystem(*users))]
 
-AdminUser = permissionGroup("Admin")
-BeneficiaryUser = permissionGroup("Beneficiary", "Admin")
-ConstructionUser = permissionGroup("Construction", "Admin")
+AdminUser = Annotated[dbTypes.User, Depends(PermissionSystem("Admin"))] 
+BeneficiaryUser= Annotated[dbTypes.User, Depends(PermissionSystem("Beneficiary", "Admin"))] 
+ConstructionUser = Annotated[dbTypes.User, Depends(PermissionSystem("Construction", "Admin"))]
