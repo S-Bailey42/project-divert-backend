@@ -19,6 +19,7 @@ WorkSiteRouter = APIRouter(prefix="/worksite")
 AuthRouter = APIRouter(prefix="/auth")
 UserRouter = APIRouter(prefix="/user")
 RequestRouter = APIRouter(prefix="/request")
+ItemsRouter = APIRouter(prefix="/items")
 
 EMAIL_re = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$" 
 class requestAccountModel(BaseModel):
@@ -127,7 +128,72 @@ async def acceptRequest(admin: AdminUser, id: str, db_session: DBSession):
     await db_session.delete(request)
     await db_session.commit()
     return ret
+
+@RequestRouter.post("/add-item")
+async def addNewItem(newItem: dbTypes.newItemModel, db_session: DBSession):
+    item_type_validator = await db_session.get(Table.ItemType, newItem.itemTypeID)
+    if not item_type_validator:
+        return "Item Type does not exist"
+
+    new_item = Table.Item(
+        Name=newItem.name,
+        SiteID=newItem.siteID,
+        ItemTypeID=newItem.itemTypeID,
+        Quantity=newItem.quantity,
+        KGperItem=newItem.kgPerItem,
+        Carbon=newItem.carbon, Dimensions=newItem.dimensions)
     
+    db_session.add(new_item)
+    await db_session.commit()
+    await db_session.refresh(new_item)
+    return Table.to_dict(new_item)
+
+@RequestRouter.delete("/remove-item/{item_id}")
+async def deleteItem(item_id: str, db_session: DBSession):
+    request = await db_session.get(Table.Item, int(item_id))
+    if not request:
+        #raise error here
+        return
+    
+    await db_session.delete(request)
+    await db_session.commit()
+
+    return "deleted"
+
+@RequestRouter.post("/add-item-type")
+async def addNewItemType(newItemType: str , db_session: DBSession):
+    new_item_type =Table.ItemType(
+        Name=newItemType
+    )
+
+    db_session.add(new_item_type)
+    await db_session.commit()
+    await db_session.refresh(new_item_type)
+    return Table.to_dict(new_item_type)
+
+@RequestRouter.post("/add-site")
+async def addNewSite(newSite: dbTypes.newSiteModel, db_session: DBSession):
+    new_site = Table.Site(
+        Coordinates= newSite.Coordinates,
+        Address= newSite.Address,
+        Postcode= newSite.Postcode,
+        SiteManager= newSite.SiteManager,
+        PhoneNumber= newSite.PhoneNumber,
+        Email= newSite.Email,
+        StartDate= newSite.StartDate, 
+        EndDate= newSite.EndDate
+    )
+
+    db_session.add(new_site)
+    await db_session.commit()
+    await db_session.refresh(new_site)
+    return Table.to_dict(new_site)
+
+@ItemsRouter.get("")
+async def displayItems():
+    return "works"
+
+
 
 
 
@@ -135,3 +201,4 @@ app.include_router(WorkSiteRouter)
 app.include_router(AuthRouter)
 app.include_router(UserRouter)
 app.include_router(RequestRouter)
+app.include_router(ItemsRouter)
