@@ -12,7 +12,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from starlette.requests import Request
-
+from sqlalchemy import select
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 app.state.limiter = limiter
@@ -38,7 +38,7 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-class requestAccount(BaseModel):
+class requestAccountModel(BaseModel):
     companyName: str
     email: str = Field(pattern=EMAIL_re)
     userType: str
@@ -62,11 +62,14 @@ async def get_current_user(
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
+            print("1")
             raise expectionTypes.Incorrect_email_password
     except JWTError:
+        print("2")
         raise expectionTypes.Incorrect_email_password
     user = await get_user_by_email(username, session)
     if user is None:
+        print("3")
         raise expectionTypes.Incorrect_email_password
     return user
 
@@ -127,8 +130,77 @@ async def createUser(
 
 @RequestRouter.post("/account")
 @limiter.limit("5/minute")
-def getAccount(request: Request, data: requestAccount,db_session: DBSession):
-    pass
+async def requestAccount(request: Request, data: requestAccountModel, db_session: DBSession):
+    #check if the email is in the user table
+    stmt = select(Table.User).where(Table.User.Email == data.email)
+    user_email_check = (await db_session.execute(stmt)).scalar()
+    if user_email_check:
+        return
+
+    #check if the email is in the requestAccount table
+    stmt = select(Table.RequestAccount).where(Table.RequestAccount.email == data.email)
+    requestAccount_email_check = (await db_session.execute(stmt)).scalar()
+    if requestAccount_email_check:
+        return
+
+    #check if the usertype is correct
+    stmt = select(Table.UserType).where(Table.UserType.Name == data.userType)
+    userType = (await db_session.execute(stmt)).scalar()
+
+    if not userType:
+        raise expectionTypes.Invaild_value("userType", data.userType)
+    
+    #if the userType is not either construction or beneficiary.
+    allowed_accounts = ("Construction", "Beneficiary")
+    if userType.Name not in allowed_accounts:
+        raise expectionTypes.Invaild_value("userType", userType.Name) 
+    
+    db_session.add(
+        Table.RequestAccount(
+            companyName=data.companyName,
+            email=data.email,
+            userType=userType.id
+        )
+    )
+    await db_session.commit()
+    return 
+
+@RequestRouter.get("/view")
+async def viewRequests(admin: AdminUser, db_session: DBSession):
+    req = await db_session.execute(select(Table.RequestAccount))
+    return req.scalars().all()
+
+
+@RequestRouter.post("/reject")
+async def rejectRequest(admin: AdminUser, id: str, db_session: DBSession):
+    # find request
+    request = await db_session.get(Table.RequestAccount, id)
+    if not request:
+        #raise error here
+        return
+    await db_session.delete(request)
+    await db_session.commit()
+
+@RequestRouter.post("/accept")
+async def acceptRequest(admin: AdminUser, id: str, db_session: DBSession):
+    request = await db_session.get(Table.RequestAccount, id)
+    if not request:
+        #raise error here
+        return
+    new_user = dbTypes.NewUser(
+        Name = request.companyName,
+        Email = request.email,
+        UserTypeID = request.userType,
+        CharityNumber= None,
+        PhoneNumber= None
+    )
+    ret = await create_account(db_session, new_user)
+    await db_session.delete(request)
+    await db_session.commit()
+    return ret
+    
+
+
 
 app.include_router(WorkSiteRouter)
 app.include_router(AuthRouter)
