@@ -182,5 +182,9 @@ class RequestAccount(Base):
     email = Column(String)
     userType = Column(Integer, ForeignKey("UserType.id"))
 
+class Image(Base):
+    __tablename__ = "Image"
+    id = Column(String, primary_key=True, default=gen_uuid)
+    ItemID = Column(Integer, ForeignKey("Item.id"))
 
 # Base.metadata.create_all(engine)

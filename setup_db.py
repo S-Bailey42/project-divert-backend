@@ -15,24 +15,22 @@ async def main():
         await connection.run_sync(Table.Base.metadata.create_all)
 
     userTypes = ("Construction", "Beneficiary", "Admin")
-    with open("admin.json", "r") as f:
-        admin_json = json.load(f)
+    with open("accounts.json", "r") as f:
+        accounts = json.load(f)
 
     async with sessionmanager.session() as session:
         for t in userTypes:
             session.add(db.UserType(Name=t))
         await session.commit()
-
-
-        admin_account = dbTypes.NewUser(
-            Name="admin",
-            Email="admin",
-            CharityNumber = None,
-            UserTypeID = 3,
-            PhoneNumber = None
-        ) 
-        await create_account(session, admin_account, admin_json["password"])
-
+        for acc in accounts:
+            acc_obj = dbTypes.NewUser(
+                Name=acc["name"],
+                Email=acc["email"],
+                CharityNumber = None,
+                UserTypeID = acc["type"],
+                PhoneNumber = None
+            ) 
+            await create_account(session, acc_obj, acc["password"])
 
 if __name__ == "__main__":
     asyncio.run(main())

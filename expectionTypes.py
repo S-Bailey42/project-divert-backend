@@ -22,3 +22,9 @@ def Invaild_value(name: str, value):
         HTTPStatus.NOT_FOUND,
         detail=f"{name} has an invalid value of {value}"
     )
+
+def Already_exists(column: str, value):
+    return HTTPException(
+        HTTPStatus.CONFLICT, 
+        detail=f"{value} already exists as a value on {column}"
+        )

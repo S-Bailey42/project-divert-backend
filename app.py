@@ -1,6 +1,6 @@
 from fastapi import FastAPI, APIRouter, Depends
 from pydantic import BaseModel,Field
-from typing import Annotated
+from typing import Annotated, List
 from fastapi.security import OAuth2PasswordRequestForm
 import expectionTypes
 from api import *
@@ -10,7 +10,14 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from starlette.requests import Request
 from sqlalchemy import select
-from auth import AdminUser, LoginUserInfo, create_token
+from auth import AdminUser, LoginUserInfo, create_token, ConstructionUser
+from basicauth import decode
+from types import SimpleNamespace
+from fastapi import File, UploadFile
+
+
+Image_location = "./images"
+
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 app.state.limiter = limiter
@@ -19,7 +26,7 @@ WorkSiteRouter = APIRouter(prefix="/worksite")
 AuthRouter = APIRouter(prefix="/auth")
 UserRouter = APIRouter(prefix="/user")
 RequestRouter = APIRouter(prefix="/request")
-ItemsRouter = APIRouter(prefix="/items")
+ItemRouter = APIRouter(prefix="/item")
 
 EMAIL_re = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$" 
 class requestAccountModel(BaseModel):
@@ -48,7 +55,7 @@ async def loginUser(
 # TODO: the database and api needs to be updated to surport this.
 # On first time login, it will require the user to reset the password
 @AuthRouter.post("/signup")
-async def createUser(
+async def create_User(
     newUser: dbTypes.NewUser,
     admin: AdminUser,
     db_session: DBSession
@@ -58,9 +65,21 @@ async def createUser(
         user_obj=newUser
         )
 
+@AuthRouter.post("/login/basic")
+async def Login_with_basic_auth(basic: str, db_session: DBSession):
+    try:
+        username, password = decode(basic)
+    except:
+        raise expectionTypes.Invaild_value("basic", basic)
+    if not (
+        await authenticate_user(db_session, username, password)
+    ):
+        raise expectionTypes.Incorrect_email_password
+    return create_token(SimpleNamespace(username = username))
+
 @RequestRouter.post("/account")
 @limiter.limit("5/minute")
-async def requestAccount(request: Request, data: requestAccountModel, db_session: DBSession):
+async def request_Account(request: Request, data: requestAccountModel, db_session: DBSession):
     #check if the email is in the user table
     stmt = select(Table.User).where(Table.User.Email == data.email)
     user_email_check = (await db_session.execute(stmt)).scalar()
@@ -96,13 +115,13 @@ async def requestAccount(request: Request, data: requestAccountModel, db_session
     return 
 
 @RequestRouter.get("/view")
-async def viewRequests(admin: AdminUser, db_session: DBSession):
+async def view_Requests(admin: AdminUser, db_session: DBSession):
     req = await db_session.execute(select(Table.RequestAccount))
     return req.scalars().all()
 
 
 @RequestRouter.post("/reject")
-async def rejectRequest(admin: AdminUser, id: str, db_session: DBSession):
+async def reject_Request(admin: AdminUser, id: str, db_session: DBSession):
     # find request
     request = await db_session.get(Table.RequestAccount, id)
     if not request:
@@ -112,11 +131,11 @@ async def rejectRequest(admin: AdminUser, id: str, db_session: DBSession):
     await db_session.commit()
 
 @RequestRouter.post("/accept")
-async def acceptRequest(admin: AdminUser, id: str, db_session: DBSession):
+async def accept_Request(admin: AdminUser, id: str, db_session: DBSession):
     request = await db_session.get(Table.RequestAccount, id)
     if not request:
-        #raise error here
-        return
+        raise expectionTypes.Invaild_value("id", id)
+        
     new_user = dbTypes.NewUser(
         Name = request.companyName,
         Email = request.email,
@@ -129,41 +148,87 @@ async def acceptRequest(admin: AdminUser, id: str, db_session: DBSession):
     await db_session.commit()
     return ret
 
-@RequestRouter.post("/add-item")
-async def addNewItem(newItem: dbTypes.newItemModel, db_session: DBSession):
+@WorkSiteRouter.post("/add/item")
+async def add_item_to_work_site(
+    user: ConstructionUser, 
+    newItem: dbTypes.newItemModel, 
+    db_session: DBSession):
     item_type_validator = await db_session.get(Table.ItemType, newItem.itemTypeID)
     if not item_type_validator:
         return "Item Type does not exist"
 
+    Site = await db_session.get(Table.Site, newItem.siteID)
+    
+    if not Site:
+        raise expectionTypes.Invaild_value("siteID", newItem.siteID)
+    
+    if Site.UserID != user.id:
+        raise expectionTypes.incorrect_level_of_access
+     
+    #check if site has the same user id
     new_item = Table.Item(
         Name=newItem.name,
         SiteID=newItem.siteID,
         ItemTypeID=newItem.itemTypeID,
         Quantity=newItem.quantity,
         KGperItem=newItem.kgPerItem,
-        Carbon=newItem.carbon, Dimensions=newItem.dimensions)
+        Carbon=newItem.carbon, 
+        Dimensions=newItem.dimensions
+        )
     
     db_session.add(new_item)
     await db_session.commit()
     await db_session.refresh(new_item)
     return Table.to_dict(new_item)
 
-@RequestRouter.delete("/remove-item/{item_id}")
-async def deleteItem(item_id: str, db_session: DBSession):
+@WorkSiteRouter.post("/add/item/image")
+async def add_images_to_item(item_id: int, db_session: DBSession, files: list[UploadFile] = File(...)):
+    #check if item_id is real
+
+    for file in files:
+        try:
+            new_image = Table.Image(ItemID = item_id)
+            db_session.add(new_image)
+            await db_session.commit()
+            await db_session.refresh(new_image)
+
+            contents = file.file.read()
+            with open(f"{new_image}-{file.filename}", 'wb') as f:
+                f.write(contents)
+            
+        except Exception:
+            return {"message": "There was an error uploading the file(s)"}
+        finally:
+            file.file.close()
+    return [file.filename for file in files]
+
+@WorkSiteRouter.delete("/remove/item")
+async def delete_item_from_worksite(user: ConstructionUser, item_id: str, db_session: DBSession):
     request = await db_session.get(Table.Item, int(item_id))
     if not request:
-        #raise error here
-        return
+        raise expectionTypes.Invaild_value("item_id", item_id)
+    
+    Site = await db_session.get(Table.Site, request.siteID)
+
+    if not Site:
+        raise expectionTypes.Invaild_value("siteID", request.siteID)
+    
+    if Site.UserID != user.id:
+        raise expectionTypes.incorrect_level_of_access
     
     await db_session.delete(request)
     await db_session.commit()
 
-    return "deleted"
+    return
 
-@RequestRouter.post("/add-item-type")
-async def addNewItemType(newItemType: str , db_session: DBSession):
-    new_item_type =Table.ItemType(
-        Name=newItemType
+@ItemRouter.post("/add/type")
+async def add_Item_Type(admin: AdminUser, name: str , db_session: DBSession):
+
+    stmt = select(Table.ItemType).where(Table.ItemType.Name == name)
+    if not (await db_session.execute(stmt)).scalar_one_or_none():
+        raise
+    new_item_type = Table.ItemType(
+        Name=name
     )
 
     db_session.add(new_item_type)
@@ -171,9 +236,10 @@ async def addNewItemType(newItemType: str , db_session: DBSession):
     await db_session.refresh(new_item_type)
     return Table.to_dict(new_item_type)
 
-@RequestRouter.post("/add-site")
-async def addNewSite(newSite: dbTypes.newSiteModel, db_session: DBSession):
+@WorkSiteRouter.post("/create")
+async def create_worksite(user: ConstructionUser, newSite: dbTypes.newSiteModel, db_session: DBSession):
     new_site = Table.Site(
+        UserID = user.id,
         Coordinates= newSite.Coordinates,
         Address= newSite.Address,
         Postcode= newSite.Postcode,
@@ -189,8 +255,12 @@ async def addNewSite(newSite: dbTypes.newSiteModel, db_session: DBSession):
     await db_session.refresh(new_site)
     return Table.to_dict(new_site)
 
-@ItemsRouter.get("")
-async def displayItems():
+@WorkSiteRouter.delete("/delete")
+async def delete_worksite(user: ConstructionUser,worksite_id: str, db_session: DBSession):
+    pass
+
+@ItemRouter.get("")
+async def display_Items():
     return "works"
 
 
@@ -201,4 +271,4 @@ app.include_router(WorkSiteRouter)
 app.include_router(AuthRouter)
 app.include_router(UserRouter)
 app.include_router(RequestRouter)
-app.include_router(ItemsRouter)
+app.include_router(ItemRouter)

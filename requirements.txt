@@ -7,3 +7,5 @@ aiosqlite==0.20.0
 bcrypt==4.1.2
 slowapi
 fire
+basicauth
+python-multipart
