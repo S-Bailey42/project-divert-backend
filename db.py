@@ -101,7 +101,7 @@ class Site(Base):  #
     Postcode = Column(String)
     SiteManager = Column(String)
     PhoneNumber = Column(String)
-    Email = Column(String)
+    IsActive = Column(Boolean)
     StartDate = Column(DateTime(timezone=True))
     EndDate = Column(DateTime(timezone=True))
 
