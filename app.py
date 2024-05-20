@@ -15,6 +15,7 @@ from basicauth import decode
 from types import SimpleNamespace
 from fastapi import File, UploadFile
 import glob
+import os
 from fastapi.responses import FileResponse
 Image_location = "./images"
 
@@ -22,6 +23,7 @@ limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 WorkSiteRouter = APIRouter(prefix="/worksite", tags=["Worksite"])
 AuthRouter = APIRouter(prefix="/auth", tags=["Auth"])
 UserRouter = APIRouter(prefix="/user", tags=["User"])
@@ -264,6 +266,14 @@ async def delete_item_from_worksite(user: ConstructionUser, item_id: str, db_ses
     
     await db_session.delete(request)
     await db_session.commit()
+    all_images_query = select(Table.Image).where(Table.Image.ItemID == item_id)
+    for image in (await db_session.execute(all_images_query)).scalars():
+        filepath = f"./images/{item_id}-{image.id}-{image.filename}"
+        try:
+            if os.path.isfile(filepath):
+                os.remove(filepath)
+        except:
+            pass
 
     return 
 
