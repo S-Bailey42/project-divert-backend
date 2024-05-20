@@ -10,7 +10,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from starlette.requests import Request
 from sqlalchemy import select
-from auth import AdminUser, LoginUserInfo, create_token, ConstructionUser
+from auth import AdminUser, LoginUserInfo, create_token, ConstructionUser, BeneficiaryUser
 from basicauth import decode
 from types import SimpleNamespace
 from fastapi import File, UploadFile
@@ -26,7 +26,7 @@ WorkSiteRouter = APIRouter(prefix="/worksite", tags=["Worksite"])
 AuthRouter = APIRouter(prefix="/auth", tags=["Auth"])
 UserRouter = APIRouter(prefix="/user", tags=["User"])
 RequestRouter = APIRouter(prefix="/request", tags=["Request"])
-ItemRouter = APIRouter(prefix="/item", tags=["Item"])
+ItemRouter = APIRouter(prefix="/items", tags=["Item"])
 
 EMAIL_re = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$" 
 class requestAccountModel(BaseModel):
@@ -265,14 +265,17 @@ async def delete_item_from_worksite(user: ConstructionUser, item_id: str, db_ses
     await db_session.delete(request)
     await db_session.commit()
 
-    return
+    return 
 
 @ItemRouter.post("/add/type")
 async def add_Item_Type(admin: AdminUser, name: str , db_session: DBSession):
 
     stmt = select(Table.ItemType).where(Table.ItemType.Name == name)
-    if not (await db_session.execute(stmt)).scalar_one_or_none():
-        raise
+    if (await db_session.execute(stmt)).scalar_one_or_none():
+        return "Item type already exist"
+
+
+
     new_item_type = Table.ItemType(
         Name=name
     )
@@ -291,9 +294,9 @@ async def create_worksite(user: ConstructionUser, newSite: dbTypes.newSiteModel,
         Postcode= newSite.Postcode,
         SiteManager= newSite.SiteManager,
         PhoneNumber= newSite.PhoneNumber,
-        Email= newSite.Email,
+        IsActive= True,
+        #Email= user.Email,
         StartDate= newSite.StartDate, 
-        EndDate= newSite.EndDate
     )
 
     db_session.add(new_site)
@@ -306,8 +309,14 @@ async def delete_worksite(user: ConstructionUser,worksite_id: str, db_session: D
     pass
 
 @ItemRouter.get("")
-async def display_Items():
-    return "works"
+async def display_Items(db_session: DBSession):
+    req = await db_session.execute(select(Table.Item))
+    return req.scalars().all()
+
+# UserRouter.post("/site/add")
+# sync def add_worksite(user: ConstructionUser | BeneficiaryUser, db_session: DBSession, new_site: dbTypes.NEW):
+#    user = await db_session.get(Table.User, newItem.siteID)
+# 
 
 
 

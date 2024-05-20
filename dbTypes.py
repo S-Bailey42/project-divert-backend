@@ -28,12 +28,11 @@ class newItemModel(BaseModel):
     dimensions: str
 
 class newSiteModel(BaseModel):
-    UserID: Optional[str] = None
     Coordinates: str
     Address: str
     Postcode: str
     SiteManager: str
+    IsActive: bool
     PhoneNumber: str
-    Email: str
     StartDate: datetime
-    EndDate: datetime
+    EndDate: Optional[datetime]

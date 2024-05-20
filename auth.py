@@ -60,6 +60,7 @@ class PermissionSystem:
                 raise expectionTypes.incorrect_level_of_access
         else:
             raise expectionTypes.Invaild_value("UserTypeID", user.UserTypeID)
+        return user
     
 class Token(BaseModel):
     access_token: str
