@@ -240,7 +240,7 @@ async def add_Item_Type(admin: AdminUser, name: str , db_session: DBSession):
     return Table.to_dict(new_item_type)
 
 @WorkSiteRouter.post("/create")
-async def create_worksite(user: User, newSite: dbTypes.newSiteModel, db_session: DBSession):
+async def create_worksite(user: ConstructionUser, newSite: dbTypes.newSiteModel, db_session: DBSession):
     new_site = Table.Site(
         UserID = user.id,
         Coordinates= newSite.Coordinates,
@@ -249,7 +249,7 @@ async def create_worksite(user: User, newSite: dbTypes.newSiteModel, db_session:
         SiteManager= newSite.SiteManager,
         PhoneNumber= newSite.PhoneNumber,
         IsActive= True,
-        Email= user.Email,
+        #Email= user.Email,
         StartDate= newSite.StartDate, 
     )
 

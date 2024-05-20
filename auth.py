@@ -60,6 +60,7 @@ class PermissionSystem:
                 raise expectionTypes.incorrect_level_of_access
         else:
             raise expectionTypes.Invaild_value("UserTypeID", user.UserTypeID)
+        return user
     
 class Token(BaseModel):
     access_token: str
@@ -77,4 +78,4 @@ def permissionGroup(*users: str):
 
 AdminUser = Annotated[dbTypes.User, Depends(PermissionSystem("Admin"))] 
 BeneficiaryUser= Annotated[dbTypes.User, Depends(PermissionSystem("Beneficiary", "Admin"))] 
-ConstructionUser = Annotated[dbTypes.User, Depends(PermissionSystem("Construction", "Admin"))]
+ConstructionUser = Annotated[dbTypes.User, Depends(PermissionSystem("Construction"))]
