@@ -78,4 +78,4 @@ def permissionGroup(*users: str):
 
 AdminUser = Annotated[dbTypes.User, Depends(PermissionSystem("Admin"))] 
 BeneficiaryUser= Annotated[dbTypes.User, Depends(PermissionSystem("Beneficiary", "Admin"))] 
-ConstructionUser = Annotated[dbTypes.User, Depends(PermissionSystem("Construction"))]
+ConstructionUser = Annotated[dbTypes.User, Depends(PermissionSystem("Construction", "Admin"))]
