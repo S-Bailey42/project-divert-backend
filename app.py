@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter, Depends
-from pydantic import BaseModel,Field
+from pydantic import BaseModel,Field,EmailStr
 from typing import Annotated, List
 from fastapi.security import OAuth2PasswordRequestForm
 import expectionTypes
@@ -14,12 +14,22 @@ from auth import AdminUser, LoginUserInfo, create_token, ConstructionUser, Benef
 from basicauth import decode
 from types import SimpleNamespace
 from fastapi import File, UploadFile
-
+from fastapi.middleware.cors import CORSMiddleware
 
 Image_location = "./images"
 
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 WorkSiteRouter = APIRouter(prefix="/worksite")
@@ -28,10 +38,10 @@ UserRouter = APIRouter(prefix="/user")
 RequestRouter = APIRouter(prefix="/request")
 ItemRouter = APIRouter(prefix="/items")
 
-EMAIL_re = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$" 
+#EMAIL_re = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$" 
 class requestAccountModel(BaseModel):
     companyName: str
-    email: str = Field(pattern=EMAIL_re)
+    email: EmailStr
     userType: str
 
 @UserRouter.get("/about")
