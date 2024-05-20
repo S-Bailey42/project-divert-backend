@@ -249,7 +249,6 @@ async def create_worksite(user: ConstructionUser, newSite: dbTypes.newSiteModel,
         SiteManager= newSite.SiteManager,
         PhoneNumber= newSite.PhoneNumber,
         IsActive= True,
-        #Email= user.Email,
         StartDate= newSite.StartDate, 
     )
 
@@ -264,18 +263,19 @@ async def delete_worksite(user: ConstructionUser,worksite_id: str, db_session: D
 
 @ItemRouter.get("")
 async def display_Items(user:LoginUserInfo ,db_session: DBSession):
-    print(user)
-    if isinstance(user, ConstructionUser):
-        return "split works"
-    elif isinstance(user, BeneficiaryUser):
+    userTypeCheck = await db_session.get(Table.UserType, user.UserTypeID)
+    if not userTypeCheck.Name:
+        return "Something went wrong"
+    elif userTypeCheck.Name == "Construction":
+        site = await db_session.execute(select(Table.Site).filter_by(UserID=user.id))
+        siteObject = site.scalars().first()
+        siteId = siteObject.id
+        siteItems = await db_session.execute(select(Table.Item).filter_by(SiteID=siteId))
+        return siteItems.scalars().all()
+    elif userTypeCheck.Name == "Beneficiary":
         req = await db_session.execute(select(Table.Item))
         return req.scalars().all()
     
-
-# UserRouter.post("/site/add")
-# sync def add_worksite(user: ConstructionUser | BeneficiaryUser, db_session: DBSession, new_site: dbTypes.NEW):
-#    user = await db_session.get(Table.User, newItem.siteID)
-# 
 
 
 
