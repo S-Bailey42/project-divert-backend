@@ -15,12 +15,49 @@ async def main():
         await connection.run_sync(Table.Base.metadata.create_all)
 
     userTypes = ("Construction", "Beneficiary", "Admin")
+    itemTypes = (
+        "lumber",
+        "bricks",
+        "cement",
+        "metal",
+        "roofing materials",
+        "insulation", 
+        "fasteners", 
+        "hand tools", 
+        "power tools", 
+        "paint", 
+        "plumbing supplies", 
+        "electrical supplies", 
+        "lighting", 
+        "windows", 
+        "doors", 
+        "flooring",
+        "carpeting",
+        "piping",
+        "masonry",
+        "drywall",
+        "aggregates",
+        "safety gear",
+        "scaffolding",
+        "unused materials",
+        "furniture",
+        "chairs",
+        "tables",
+        "shelves",
+        "cabinets",
+        "storage solutions",
+        "bed frames",
+        "mattresses",
+        "sofas"
+        )
     with open("accounts.json", "r") as f:
         accounts = json.load(f)
 
     async with sessionmanager.session() as session:
         for t in userTypes:
             session.add(db.UserType(Name=t))
+        for t in itemTypes:
+            session.add(db.ItemType(Name=t))
         await session.commit()
         for acc in accounts:
             acc_obj = dbTypes.NewUser(

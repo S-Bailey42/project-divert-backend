@@ -263,9 +263,14 @@ async def delete_worksite(user: ConstructionUser,worksite_id: str, db_session: D
     pass
 
 @ItemRouter.get("")
-async def display_Items(db_session: DBSession):
-    req = await db_session.execute(select(Table.Item))
-    return req.scalars().all()
+async def display_Items(user:LoginUserInfo ,db_session: DBSession):
+    print(user)
+    if isinstance(user, ConstructionUser):
+        return "split works"
+    elif isinstance(user, BeneficiaryUser):
+        req = await db_session.execute(select(Table.Item))
+        return req.scalars().all()
+    
 
 # UserRouter.post("/site/add")
 # sync def add_worksite(user: ConstructionUser | BeneficiaryUser, db_session: DBSession, new_site: dbTypes.NEW):
