@@ -152,7 +152,7 @@ class ItemType(Base):  #
 
 class Item(Base):  #
     __tablename__ = "Item"
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True, default=gen_uuid)
     Name = Column(String)
     SiteID = Column(String, ForeignKey("Site.id"))  #
     ItemTypeID = Column(Integer, ForeignKey("ItemType.id"))  #
@@ -169,7 +169,7 @@ class Item(Base):  #
 class ItemInterest(Base):
     __tablename__ = "ItemInterest"
     id = Column(Integer, primary_key=True)
-    ItemID = Column(Integer, ForeignKey("Item.id"))
+    ItemID = Column(String, ForeignKey("Item.id"))
     UserID = Column(String, ForeignKey("User.id"))
     IsInterested = Column(Boolean)
     item = relationship("Item", foreign_keys="ItemInterest.ItemID")
@@ -185,6 +185,7 @@ class RequestAccount(Base):
 class Image(Base):
     __tablename__ = "Image"
     id = Column(String, primary_key=True, default=gen_uuid)
-    ItemID = Column(Integer, ForeignKey("Item.id"))
+    ItemID = Column(String, ForeignKey("Item.id"))
+    filename = Column(String)
 
 # Base.metadata.create_all(engine)

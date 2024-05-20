@@ -14,19 +14,19 @@ from auth import AdminUser, LoginUserInfo, create_token, ConstructionUser
 from basicauth import decode
 from types import SimpleNamespace
 from fastapi import File, UploadFile
-
-
+import glob
+from fastapi.responses import FileResponse
 Image_location = "./images"
 
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-WorkSiteRouter = APIRouter(prefix="/worksite")
-AuthRouter = APIRouter(prefix="/auth")
-UserRouter = APIRouter(prefix="/user")
-RequestRouter = APIRouter(prefix="/request")
-ItemRouter = APIRouter(prefix="/item")
+WorkSiteRouter = APIRouter(prefix="/worksite", tags=["Worksite"])
+AuthRouter = APIRouter(prefix="/auth", tags=["Auth"])
+UserRouter = APIRouter(prefix="/user", tags=["User"])
+RequestRouter = APIRouter(prefix="/request", tags=["Request"])
+ItemRouter = APIRouter(prefix="/item", tags=["Item"])
 
 EMAIL_re = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$" 
 class requestAccountModel(BaseModel):
@@ -181,30 +181,76 @@ async def add_item_to_work_site(
     await db_session.refresh(new_item)
     return Table.to_dict(new_item)
 
-@WorkSiteRouter.post("/add/item/image")
-async def add_images_to_item(item_id: int, db_session: DBSession, files: list[UploadFile] = File(...)):
-    #check if item_id is real
+@WorkSiteRouter.post("/item/images")
+async def add_images_to_item(user: ConstructionUser, item_id: str, db_session: DBSession, files: list[UploadFile] = File(...)):
+    #todo: add errors
+    item = await db_session.get(Table.Item, item_id)
+    if not item:
+        return 
+    site = await db_session.get(Table.Site, item.SiteID)
+    if not site:
+        return 
+    if user.id != site.UserID:
+        return
 
+
+    ret = []
     for file in files:
         try:
-            new_image = Table.Image(ItemID = item_id)
+            new_image = Table.Image(ItemID= item_id, filename= file.filename)
             db_session.add(new_image)
             await db_session.commit()
             await db_session.refresh(new_image)
-
+            new_image_filename = f"{item_id}-{new_image.id}-{file.filename}"
             contents = file.file.read()
-            with open(f"{new_image}-{file.filename}", 'wb') as f:
+            with open(f"./images/{new_image_filename}", 'wb') as f:
                 f.write(contents)
             
         except Exception:
             return {"message": "There was an error uploading the file(s)"}
         finally:
             file.file.close()
-    return [file.filename for file in files]
+    return ret
+
+@WorkSiteRouter.get("/item/images")
+async def get_all_images_for_item(user: LoginUserInfo, item_id: str, db_session: DBSession):
+    item = await db_session.get(Table.Item, item_id)
+    if not item:
+        return 
+    
+    userType = await db_session.get(Table.UserType, user.UserTypeID)
+    if userType.Name == "Construction":
+        site = await db_session.get(Table.Site, item.SiteID)
+        if user.id != site.UserID:
+            raise expectionTypes.incorrect_level_of_access 
+    all_images_query = select(Table.Image).where(Table.Image.ItemID == item_id)
+    return [
+        {
+            "item_id": item,
+            "image_id": image.id
+        } 
+        for image in (await db_session.execute(all_images_query)).scalars()
+        ]
+@WorkSiteRouter.get("/item/images")
+async def get_image_for_item(user: LoginUserInfo, item_id: str, image_id: str, db_session: DBSession):
+    item = await db_session.get(Table.Item, item_id)
+    if not item:
+        return 
+    
+    userType = await db_session.get(Table.UserType, user.UserTypeID)
+    if userType.Name == "Construction":
+        site = await db_session.get(Table.Site, item.SiteID)
+        if user.id != site.UserID:
+            raise expectionTypes.incorrect_level_of_access 
+    image = await db_session.get(Table.Image, image_id)
+    if not image:
+        return 
+    filepath = f"./images/{item_id}-{image_id}-{image.filename}"
+    return FileResponse(filepath)
 
 @WorkSiteRouter.delete("/remove/item")
 async def delete_item_from_worksite(user: ConstructionUser, item_id: str, db_session: DBSession):
-    request = await db_session.get(Table.Item, int(item_id))
+    request = await db_session.get(Table.Item, item_id)
     if not request:
         raise expectionTypes.Invaild_value("item_id", item_id)
     
