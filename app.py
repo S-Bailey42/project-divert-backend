@@ -4,6 +4,7 @@ import WorkSiteEndpoints
 import UserEndpoints
 import AuthEndpoints
 import RequestEndpoints
+import ResourceEndpoints
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -27,3 +28,4 @@ app.include_router(AuthEndpoints.Router)
 app.include_router(UserEndpoints.Router)
 app.include_router(RequestEndpoints.Router)
 app.include_router(ItemEndpoints.Router)
+app.include_router(ResourceEndpoints.Router)
