@@ -19,13 +19,26 @@ class NewUser(BaseModel):
 
 
 class newItemModel(BaseModel):
-    name: str
-    siteID: str
-    itemTypeID: int
-    quantity: int
-    kgPerItem: int
-    carbon: Optional[int] = 0
-    dimensions: str
+    Name: str
+    SiteID: str
+    ItemTypeID:int 
+    Quantity: int 
+    KgPerItem: int 
+    Carbon: int
+    Dimensions: str 
+    Taken: bool
+
+
+class ItemModel(BaseModel):
+    id: int
+    Name: str
+    SiteID: str
+    ItemTypeID: int
+    Quantity: int
+    KgPerItem: int
+    Carbon: int = 0
+    Dimensions: str
+    Taken: bool = False
 
 class newSiteModel(BaseModel):
     Coordinates: str

@@ -158,7 +158,7 @@ class Item(Base):  #
     ItemTypeID = Column(Integer, ForeignKey("ItemType.id"))  #
     Taken = Column(Boolean)
     Quantity = Column(Integer)
-    KGperItem = Column(Integer)
+    KgPerItem = Column(Integer)
     Carbon = Column(Integer)
     Dimensions = Column(String)
 

@@ -10,3 +10,4 @@ fire
 basicauth
 python-multipart
 pydantic[email]
+fastapi-pagination

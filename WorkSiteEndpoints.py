@@ -1,6 +1,7 @@
 
 
 from fastapi import APIRouter, File, UploadFile
+from sqlalchemy import select
 from api import DBSession
 from auth import ConstructionUser
 import expectionTypes
@@ -9,7 +10,10 @@ import dbTypes
 
 
 Router = APIRouter(prefix="/worksite", tags=["Worksite"])
-
+#things this router needs for it to be fully working
+# able to add, delete, update and update items to a work site
+# able to delete items from work site
+# able to create 
 
 
 @Router.post("/add/item")
@@ -17,28 +21,30 @@ async def add_item_to_work_site(
     user: ConstructionUser, 
     newItem: dbTypes.newItemModel, 
     db_session: DBSession):
-    item_type_validator = await db_session.get(Table.ItemType, newItem.itemTypeID)
+    item_type_validator = await db_session.get(Table.ItemType, newItem.ItemTypeID)
     if not item_type_validator:
         return "Item Type does not exist"
 
-    Site = await db_session.get(Table.Site, newItem.siteID)
+    Site = await db_session.get(Table.Site, newItem.SiteID)
     
     if not Site:
-        raise expectionTypes.Invaild_value("siteID", newItem.siteID)
+        raise expectionTypes.Invaild_value("siteID", newItem.SiteID)
     
     if Site.UserID != user.id:
         raise expectionTypes.incorrect_level_of_access
      
     #check if site has the same user id
     new_item = Table.Item(
-        Name=newItem.name,
-        SiteID=newItem.siteID,
-        ItemTypeID=newItem.itemTypeID,
-        Quantity=newItem.quantity,
-        KGperItem=newItem.kgPerItem,
-        Carbon=newItem.carbon, 
-        Dimensions=newItem.dimensions
+        Name=newItem.Name,
+        SiteID=newItem.SiteID,
+        ItemTypeID=newItem.ItemTypeID,
+        Quantity=newItem.Quantity,
+        KgPerItem=newItem.KgPerItem,
+        Carbon=newItem.Carbon, 
+        Dimensions=newItem.Dimensions,
+        Taken=newItem.Taken
         )
+    print(new_item)
     
     db_session.add(new_item)
     await db_session.commit()
@@ -71,11 +77,10 @@ async def delete_item_from_worksite(user: ConstructionUser, item_id: str, db_ses
     request = await db_session.get(Table.Item, int(item_id))
     if not request:
         raise expectionTypes.Invaild_value("item_id", item_id)
-    
-    Site = await db_session.get(Table.Site, request.siteID)
+    Site = await db_session.get(Table.Site, request.SiteID)
 
     if not Site:
-        raise expectionTypes.Invaild_value("siteID", request.siteID)
+        raise expectionTypes.Invaild_value("siteID", request.SiteID)
     
     if Site.UserID != user.id:
         raise expectionTypes.incorrect_level_of_access
@@ -107,3 +112,8 @@ async def create_worksite(user: ConstructionUser, newSite: dbTypes.newSiteModel,
 @Router.delete("/delete")
 async def delete_worksite(user: ConstructionUser,worksite_id: str, db_session: DBSession):
     pass
+
+@Router.get("/mySites")
+async def get_my_worksite(user: ConstructionUser, db_session: DBSession):
+    query = await db_session.execute(select(Table.Site).filter_by(UserID=user.id))
+    return query.scalars().all()
