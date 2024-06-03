@@ -19,7 +19,7 @@ limiter = Limiter(key_func=get_remote_address)
 class requestAccountModel(BaseModel):
     companyName: str
     email: EmailStr
-    userType: str
+    userType: int
 
 
 
@@ -75,8 +75,9 @@ async def request_Account(request: Request, data: requestAccountModel, db_sessio
         return
 
     #check if the usertype is correct
-    stmt = select(Table.UserType).where(Table.UserType.Name == data.userType)
-    userType = (await db_session.execute(stmt)).scalar()
+    #stmt = select(Table.UserType).where(Table.UserType.Name == data.userType)
+    #userType = (await db_session.execute(stmt)).scalar()
+    userType = await db_session.get(Table.UserType, data.userType)
 
     if not userType:
         raise expectionTypes.Invaild_value("userType", data.userType)
