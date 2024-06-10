@@ -9,14 +9,29 @@ import expectionTypes
 from api import DBSession, authenticate_user, create_account
 from basicauth import decode
 from fastapi.security import OAuth2PasswordRequestForm
-
+from pydantic import BaseModel
 import dbTypes
 Router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-@Router.post("/login")
+class Authbody(BaseModel):
+    username: str
+    password: str
+
+@Router.post("/login/form")
 async def loginUser(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db_session: DBSession
+):
+
+    if not (
+        await authenticate_user(db_session, form_data.username, form_data.password)
+    ):
+        raise expectionTypes.Incorrect_email_password
+    return create_token(form_data)
+
+@Router.post("/login")
+async def loginUser(
+    form_data: Authbody, db_session: DBSession
 ):
 
     if not (
