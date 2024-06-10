@@ -20,16 +20,24 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login/form")
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    
+    expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
+def create_access_token_advance(data: dict):
+    to_encode = data.copy()
+    
+    expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return (encoded_jwt, expire)
 
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)], 
@@ -65,13 +73,24 @@ class PermissionSystem:
 class Token(BaseModel):
     access_token: str
     token_type: str
+class AdvanceToken(BaseModel):
+    access_token: str
+    token_type: str
+    expire_date: datetime
+    user_type_id: int
 
 def create_token(form_data: OAuth2PasswordRequestForm) -> Token:
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": form_data.username}, expires_delta=access_token_expires
-    )
+    access_token = create_access_token(data={"sub": form_data.username})
     return Token(access_token=access_token, token_type="bearer")
+
+
+def create_token_advance(form_data: OAuth2PasswordRequestForm, user: Table.User) -> AdvanceToken:
+    (access_token, expire_datetime) = create_access_token_advance(data={"sub": form_data.username})
+    return AdvanceToken(
+        access_token=access_token, 
+        token_type="bearer", 
+        expire_date=expire_datetime, 
+        user_type_id=user.UserTypeID)
 
 def permissionGroup(*users: str):
     return Annotated[dbTypes.User, Depends(PermissionSystem(*users))]

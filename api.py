@@ -123,5 +123,12 @@ async def authenticate_user(db_session: AsyncSession, email: str, pw: str):
         raise HTTPException(HTTPStatus.NOT_FOUND, "cannot find email and/or password")
     return hashing.check(pw, password_obj.Content)
 
+async def authenticate_user_advance(db_session: AsyncSession, email: str, pw: str):
+    user_obj = await get_user_by_email(email, db_session)
+
+    password_obj = await db_session.get(Table.Password, user_obj.id)
+    if password_obj == None:
+        raise HTTPException(HTTPStatus.NOT_FOUND, "cannot find email and/or password")
+    return (hashing.check(pw, password_obj.Content), user_obj)
 
 # asyncio.run(main())

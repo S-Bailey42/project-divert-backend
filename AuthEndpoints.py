@@ -4,9 +4,9 @@
 from types import SimpleNamespace
 from typing import Annotated
 from fastapi import APIRouter, Depends
-from auth import AdminUser, create_token
+from auth import AdminUser, create_token, create_token_advance
 import expectionTypes
-from api import DBSession, authenticate_user, create_account
+from api import DBSession, authenticate_user, create_account, authenticate_user_advance
 from basicauth import decode
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
@@ -33,12 +33,11 @@ async def loginUser(
 async def loginUser(
     form_data: Authbody, db_session: DBSession
 ):
+    is_auth, user_obj = await authenticate_user_advance(db_session, form_data.username, form_data.password)
 
-    if not (
-        await authenticate_user(db_session, form_data.username, form_data.password)
-    ):
+    if not is_auth:
         raise expectionTypes.Incorrect_email_password
-    return create_token(form_data)
+    return create_token_advance(form_data, user_obj)
 
 # Just to note here, the return of this function is the user's password 
 # which will not be shown again to the admin.
