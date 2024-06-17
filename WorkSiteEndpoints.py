@@ -7,6 +7,10 @@ from auth import ConstructionUser
 import expectionTypes
 import db as Table
 import dbTypes
+import config
+from sanitize_filename import sanitize
+
+
 
 
 Router = APIRouter(prefix="/worksite", tags=["Worksite"])
@@ -43,34 +47,12 @@ async def add_item_to_work_site(
         Carbon=newItem.Carbon, 
         Dimensions=newItem.Dimensions,
         Taken=newItem.Taken
-        )
-    print(new_item)
+    )
     
     db_session.add(new_item)
     await db_session.commit()
     await db_session.refresh(new_item)
     return Table.to_dict(new_item)
-
-@Router.post("/add/item/image")
-async def add_images_to_item(item_id: int, db_session: DBSession, files: list[UploadFile] = File(...)):
-    #check if item_id is real
-
-    for file in files:
-        try:
-            new_image = Table.Image(ItemID = item_id)
-            db_session.add(new_image)
-            await db_session.commit()
-            await db_session.refresh(new_image)
-
-            contents = file.file.read()
-            with open(f"{new_image}-{file.filename}", 'wb') as f:
-                f.write(contents)
-            
-        except Exception:
-            return {"message": "There was an error uploading the file(s)"}
-        finally:
-            file.file.close()
-    return [file.filename for file in files]
 
 @Router.delete("/remove/item")
 async def delete_item_from_worksite(user: ConstructionUser, item_id: str, db_session: DBSession):
@@ -81,7 +63,7 @@ async def delete_item_from_worksite(user: ConstructionUser, item_id: str, db_ses
 
     if not Site:
         raise expectionTypes.Invaild_value("siteID", request.SiteID)
-    
+
     if Site.UserID != user.id:
         raise expectionTypes.incorrect_level_of_access
     
@@ -89,6 +71,33 @@ async def delete_item_from_worksite(user: ConstructionUser, item_id: str, db_ses
     await db_session.commit()
 
     return 
+
+@Router.post("/add/item/image")
+async def add_images_to_item(item_id: int, db_session: DBSession, files: list[UploadFile] = File(...)):
+    #check if item_id is real
+    item_obj = await db_session.get(Table.Item, item_id)
+    if not item_obj:
+        raise expectionTypes.Invaild_value("item_id", item_id)
+
+    for file in files:
+        try:
+            file_name = sanitize(file.filename)
+            new_image = Table.Image(ItemID = item_id, name = file_name)
+            db_session.add(new_image)
+            await db_session.commit()
+            await db_session.refresh(new_image)
+
+            contents = file.file.read()
+            with open(f"{config.IMAGE_SRC}/{new_image.id}-{new_image.ItemID}-{file_name}", 'wb') as f:
+                f.write(contents)
+            
+        except Exception:
+            return {"message": "There was an error uploading the file(s)"}
+        finally:
+            file.file.close()
+    #return [file.filename for file in files]
+
+
 
 
 @Router.post("/create")
@@ -109,9 +118,23 @@ async def create_worksite(user: ConstructionUser, newSite: dbTypes.newSiteModel,
     await db_session.refresh(new_site)
     return Table.to_dict(new_site)
 
+
+
 @Router.delete("/delete")
-async def delete_worksite(user: ConstructionUser,worksite_id: str, db_session: DBSession):
-    pass
+async def delete_worksite(user: ConstructionUser, worksite_id: str, db_session: DBSession):
+    Site = await db_session.get(Table.Site, worksite_id)
+
+    if not Site:
+        raise expectionTypes.Invaild_value("siteID", worksite_id)
+
+    if Site.UserID != user.id:
+        raise expectionTypes.incorrect_level_of_access
+    await db_session.delete(Site)
+    await db_session.commit()
+    return
+    
+
+
 
 @Router.get("/mySites")
 async def get_my_worksite(user: ConstructionUser, db_session: DBSession):

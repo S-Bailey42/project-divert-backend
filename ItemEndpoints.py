@@ -7,6 +7,10 @@ from auth import AdminUser, LoginUserInfo
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page, add_pagination
 from dbTypes import ItemModel
+from sanitize_filename import sanitize
+from fastapi.responses import FileResponse
+import config
+import expectionTypes
 Router = APIRouter(prefix="/items", tags=["Items"])
 
 
@@ -26,6 +30,22 @@ async def add_Item_Type(admin: AdminUser, name: str , db_session: DBSession):
     await db_session.refresh(new_item_type)
     return Table.to_dict(new_item_type)
 
+
+@Router.get("/images")
+async def get_item_images(user: LoginUserInfo, db_session: DBSession, item_id: str):
+    item_obj = await db_session.get(Table.Item, item_id)
+    if not item_obj:
+        raise expectionTypes.Invaild_value("item_id", item_id)
+    query = select(Table.Image).where(Table.Image.ItemID==item_id)
+    data = (await db_session.execute(query)).scalars()
+    return [
+        f"/image/{image.id}-{image.ItemID}-{image.name}" 
+        for image in data
+    ]
+
+@Router.get("/image/{file_name}")
+async def get_image(db_session: DBSession, file_name: str):
+    return FileResponse(f"{config.IMAGE_SRC}/{sanitize(file_name)}")
 
 
 @Router.get("", response_model=Page[ItemModel])

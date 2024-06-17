@@ -11,3 +11,4 @@ basicauth
 python-multipart
 pydantic[email]
 fastapi-pagination
+sanitize_filename

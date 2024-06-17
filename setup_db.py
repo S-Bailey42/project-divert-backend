@@ -5,7 +5,7 @@ import db
 import pathlib
 import os
 import dbTypes
-
+import config 
 async def main():
     db_file = "./app.db"
     sessionmanager = DatabaseSessionManager(f"sqlite+aiosqlite:///{db_file}")
@@ -68,6 +68,9 @@ async def main():
                 PhoneNumber = None
             ) 
             await create_account(session, acc_obj, acc["password"])
+    if pathlib.Path(f"./{config.IMAGE_SRC}").is_dir():
+        os.remove(config.IMAGE_SRC)
+    os.mkdir(config.IMAGE_SRC)
 
 if __name__ == "__main__":
     asyncio.run(main())
