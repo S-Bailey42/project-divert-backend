@@ -17,6 +17,7 @@ from http import HTTPStatus
 import secrets
 from typing import Optional
 import dbTypes
+from emailServer import EmailSender
 #from validate_email import validate_email
 def passwordGen() -> str:
     return secrets.token_urlsafe(16)
@@ -103,7 +104,12 @@ async def create_account(session: AsyncSession, user_obj: dbTypes.NewUser, passw
     session.add(Table.Password(id=new_user.id, Content=pw_hash))
     await session.commit()
     await session.refresh(new_user)
-    return {**Table.to_dict(new_user), "password":password}
+    email_obj = EmailSender(
+        email='dovertproject@outlook.com',
+        password='Divert@Project123',
+        server= 'smtp.office365.com',
+    )
+    email_obj.generate_password_email(new_user.Email, password)
 
 
 async def get_user_by_email(email: str, session: AsyncSession) -> Table.User:
