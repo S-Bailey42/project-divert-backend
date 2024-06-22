@@ -47,5 +47,6 @@ class newSiteModel(BaseModel):
     SiteManager: str
     IsActive: bool
     PhoneNumber: str
-    StartDate: datetime
+    StartDate: Optional[datetime]
     EndDate: Optional[datetime]
+    SiteName: str

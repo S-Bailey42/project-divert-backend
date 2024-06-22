@@ -104,6 +104,7 @@ async def add_images_to_item(item_id: int, db_session: DBSession, files: list[Up
 async def create_worksite(user: ConstructionUser, newSite: dbTypes.newSiteModel, db_session: DBSession):
     new_site = Table.Site(
         UserID = user.id,
+        SiteName = newSite.SiteName,
         Coordinates= newSite.Coordinates,
         Address= newSite.Address,
         Postcode= newSite.Postcode,
@@ -111,6 +112,7 @@ async def create_worksite(user: ConstructionUser, newSite: dbTypes.newSiteModel,
         PhoneNumber= newSite.PhoneNumber,
         IsActive= True,
         StartDate= newSite.StartDate, 
+        EndDate= newSite.EndDate,
     )
 
     db_session.add(new_site)
