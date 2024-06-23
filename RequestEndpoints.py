@@ -1,6 +1,6 @@
 
 
-
+from emailServer import EmailSender
 from fastapi import APIRouter, Request
 from pydantic import BaseModel, EmailStr
 from slowapi import Limiter
@@ -38,6 +38,29 @@ async def reject_Request(admin: AdminUser, id: str, db_session: DBSession):
         return
     await db_session.delete(request)
     await db_session.commit()
+
+    email_obj = EmailSender(
+        email='dovertproject@outlook.com',
+        password='Divert@Project123',
+        server='smtp.office365.com',
+    )
+
+    email_obj.send_email(
+        request.email,
+        "Encore Services - Account Request Rejected",
+        f"""Dear {request.companyName},
+
+Thank you for your interest in joining Project Divert. After careful consideration, we regret to inform you that your account request has been rejected. 
+
+If you have any questions or need further assistance, please feel free to contact our support team at info@encore-environment.com.
+
+Best regards,
+Encore Services Team
+"""
+    )
+    return{"detail": "Request rejected and email notification sent"}
+
+
 
 @Router.post("/accept")
 async def accept_Request(admin: AdminUser, id: str, db_session: DBSession):
