@@ -96,6 +96,7 @@ class Site(Base):  #
     __tablename__ = "Site"
     id = Column(String, primary_key=True, default=gen_uuid)
     UserID = Column(String, ForeignKey("User.id"))
+    SiteName = Column(String)
     Coordinates = Column(String)
     Address = Column(String)
     Postcode = Column(String)
