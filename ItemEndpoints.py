@@ -39,7 +39,7 @@ async def get_item_images(user: LoginUserInfo, db_session: DBSession, item_id: s
     query = select(Table.Image).where(Table.Image.ItemID==item_id)
     data = (await db_session.execute(query)).scalars()
     return [
-        f"/image/{image.id}-{image.ItemID}-{image.name}" 
+        f"{image.id}-{image.ItemID}-{image.name}" 
         for image in data
     ]
 
