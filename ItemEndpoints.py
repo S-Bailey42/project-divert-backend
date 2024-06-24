@@ -59,13 +59,9 @@ async def display_Items(user: LoginUserInfo ,db_session: DBSession) -> Page[Item
         if not siteObject:
             return None
         siteId = siteObject.id
-        #siteItems = await db_session.execute(select(Table.Item).filter_by(SiteID=siteId))
         return await paginate(db_session, select(Table.Item).filter_by(SiteID=siteId))
-        #return siteItems.scalars().all()
     elif userTypeCheck.Name == "Beneficiary":
         return await paginate(db_session, select(Table.Item))
-        #req = await db_session.execute(select(Table.Item))
-        #return req.scalars().all()
     else:
         return await paginate(db_session, select(Table.Item))
     

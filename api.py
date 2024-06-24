@@ -83,6 +83,25 @@ async def check_if_user_exists(email: str, session: AsyncSession) -> bool:
         return True
     return False
 
+async def create_account_no_email(session: AsyncSession, user_obj: dbTypes.NewUser, password: str):
+    
+    if await check_if_user_exists(user_obj.Email, session):
+        raise HTTPException(HTTPStatus.BAD_REQUEST, "Invaild email")
+
+    if not (userType := await session.get(Table.UserType, user_obj.UserTypeID)):
+        raise HTTPException(HTTPStatus.NOT_FOUND, "cannot find userType")
+    #if userType.Name.lower() != "admin":
+    #    if not validate_email(user_obj.Email):
+    #        raise HTTPException(HTTPStatus.BAD_REQUEST, "Invaild email")
+
+    pw_hash = hashing.password(password)
+    new_user = Table.User(Name=user_obj.Name, Email=user_obj.Email, UserTypeID=user_obj.UserTypeID)
+    session.add(new_user)
+    await session.commit()
+    await session.refresh(new_user)
+    session.add(Table.Password(id=new_user.id, Content=pw_hash))
+    await session.commit()
+    await session.refresh(new_user)
 
 async def create_account(session: AsyncSession, user_obj: dbTypes.NewUser, password: Optional[str] = None):
     if not password:

@@ -67,7 +67,7 @@ async def main():
                 UserTypeID = acc["type"],
                 PhoneNumber = None
             ) 
-            await create_account(session, acc_obj, acc["password"])
+            await create_account_no_email(session, acc_obj, acc["password"])
     if pathlib.Path(f"./{config.IMAGE_SRC}").is_dir():
         os.remove(config.IMAGE_SRC)
     os.mkdir(config.IMAGE_SRC)
