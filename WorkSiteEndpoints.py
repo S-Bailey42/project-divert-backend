@@ -142,3 +142,13 @@ async def delete_worksite(user: ConstructionUser, worksite_id: str, db_session: 
 async def get_my_worksite(user: ConstructionUser, db_session: DBSession):
     query = await db_session.execute(select(Table.Site).filter_by(UserID=user.id))
     return query.scalars().all()
+#todo: improve to allow non ConstructionUsers to access
+@Router.get("")
+async def get_worksite(user: ConstructionUser, db_session: DBSession, worksite_id: str):
+    Site = await db_session.get(Table.Site, worksite_id)
+    if not Site:
+        raise expectionTypes.Invaild_value("worksite_id", worksite_id)
+    if Site.UserID != user.id:
+        raise expectionTypes.incorrect_level_of_access
+    return Site
+
