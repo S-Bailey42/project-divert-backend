@@ -78,6 +78,7 @@ class AdvanceToken(BaseModel):
     token_type: str
     expire_date: datetime
     user_type_id: int
+    user_id: str
 
 def create_token(form_data: OAuth2PasswordRequestForm) -> Token:
     access_token = create_access_token(data={"sub": form_data.username})
@@ -90,7 +91,8 @@ def create_token_advance(form_data: OAuth2PasswordRequestForm, user: Table.User)
         access_token=access_token, 
         token_type="bearer", 
         expire_date=expire_datetime, 
-        user_type_id=user.UserTypeID)
+        user_type_id=user.UserTypeID,
+        user_id=user.id)
 
 def permissionGroup(*users: str):
     return Annotated[dbTypes.User, Depends(PermissionSystem(*users))]
