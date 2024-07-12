@@ -17,7 +17,7 @@ incorrect_level_of_access = HTTPException(
     detail="you do not have access.",
     headers={"WWW-Authenticate": "Bearer"},
 )
-def Invaild_value(name: str, value):
+def Invalid_value(name: str, value):
     return HTTPException(
         HTTPStatus.NOT_FOUND,
         detail=f"{name} has an invalid value of {value}"

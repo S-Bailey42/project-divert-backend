@@ -1,9 +1,10 @@
 
 
 
+from http import HTTPStatus
 from types import SimpleNamespace
 from typing import Annotated
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from auth import AdminUser, create_token, create_token_advance
 import expectionTypes
 from api import DBSession, authenticate_user, create_account, authenticate_user_advance
@@ -11,6 +12,8 @@ from basicauth import decode
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 import dbTypes
+import db as Table
+from sqlalchemy.future import select
 Router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
@@ -37,7 +40,15 @@ async def loginUser(
 
     if not is_auth:
         raise expectionTypes.Incorrect_email_password
-    return create_token_advance(form_data, user_obj)
+    
+    stmt = select(Table.Site).where(Table.Site.UserID == user_obj.id)
+    result = await db_session.execute(stmt)
+    site_obj = result.scalars().first()
+    
+    if not site_obj:
+        raise HTTPException(HTTPStatus.NOT_FOUND, "User does not have an associated site.")
+
+    return create_token_advance(form_data, user_obj, site_obj)
 
 # Just to note here, the return of this function is the user's password 
 # which will not be shown again to the admin.

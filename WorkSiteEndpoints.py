@@ -1,7 +1,8 @@
 
 
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 from api import DBSession
 from auth import ConstructionUser
 import expectionTypes
@@ -32,7 +33,7 @@ async def add_item_to_work_site(
     Site = await db_session.get(Table.Site, newItem.SiteID)
     
     if not Site:
-        raise expectionTypes.Invaild_value("siteID", newItem.SiteID)
+        raise expectionTypes.Invalid_value("siteID", newItem.SiteID)
     
     if Site.UserID != user.id:
         raise expectionTypes.incorrect_level_of_access
@@ -135,9 +136,6 @@ async def delete_worksite(user: ConstructionUser, worksite_id: str, db_session: 
     await db_session.commit()
     return
     
-
-
-
 @Router.get("/mySites")
 async def get_my_worksite(user: ConstructionUser, db_session: DBSession):
     query = await db_session.execute(select(Table.Site).filter_by(UserID=user.id))
@@ -152,3 +150,21 @@ async def get_worksite(user: ConstructionUser, db_session: DBSession, worksite_i
         raise expectionTypes.incorrect_level_of_access
     return Site
 
+@Router.get("/items/{site_id}")
+async def get_site_items(
+    user: ConstructionUser,
+    site_id: str,
+    db_session: DBSession
+):
+    #check if site exists and belongs to the user
+    site = await db_session.execute(select(Table.Site).filter_by(UserID=user.id, id=site_id))
+    siteObject = site.scalars().first()
+
+    if not siteObject:
+        raise expectionTypes.Invalid_value("site_id", site_id)
+    
+    #Query for items on the site
+    items = await db_session.execute(select(Table.Item).filter_by(SiteID=site_id))
+    items_list = items.scalars().all()
+
+    return [Table.to_dict(item) for item in items_list]
