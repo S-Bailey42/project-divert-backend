@@ -1,15 +1,18 @@
 
 
 from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi.security import OAuth2PasswordBearer
+from auth import oauth2_scheme
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from api import DBSession
-from auth import ConstructionUser
+from auth import ConstructionUser, update_auth_token
 import expectionTypes
 import db as Table
 import dbTypes
 import config
 from sanitize_filename import sanitize
+
 
 
 
@@ -121,6 +124,8 @@ async def create_worksite(user: ConstructionUser, newSite: dbTypes.newSiteModel,
     await db_session.refresh(new_site)
     return Table.to_dict(new_site)
 
+    
+
 
 
 @Router.delete("/delete")
@@ -168,3 +173,23 @@ async def get_site_items(
     items_list = items.scalars().all()
 
     return [Table.to_dict(item) for item in items_list]
+
+@Router.post("/update-site")
+async def updateSiteID(
+    user: ConstructionUser,
+    site_id: str,
+    db_session: DBSession,
+    token: str = Depends(oauth2_scheme)
+):
+    site = await db_session.get(Table.Site, site_id)
+
+    if not site:
+        raise expectionTypes.Invalid_value("siteID", site_id)
+    
+    if site.UserID != user.id:
+        raise expectionTypes.incorrect_level_of_access
+    
+    new_token = update_auth_token(token, site_id)
+    return {"authToken": new_token}
+    
+    

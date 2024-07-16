@@ -3,7 +3,7 @@
 
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
-
+from jose import jwt
 from pydantic import BaseModel
 from api import DBSession, get_user_by_email
 import dbTypes
@@ -95,6 +95,17 @@ def create_token_advance(form_data: OAuth2PasswordRequestForm, user: Table.User,
         user_type_id=user.UserTypeID,
         user_id=user.id,
         site_id=site.id)
+
+def decode_token(token: str) -> dict:
+    #decode token to extract the payload
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    return payload
+
+def update_auth_token(old_token: str, new_site_id: str) -> str:
+    payload = decode_token(old_token)
+    payload["site_id"] = new_site_id
+    new_token = create_access_token_advance(data=payload)
+    return new_token
 
 def permissionGroup(*users: str):
     return Annotated[dbTypes.User, Depends(PermissionSystem(*users))]
