@@ -46,7 +46,7 @@ async def loginUser(
     site_obj = result.scalars().first()
     
     if not site_obj:
-        raise HTTPException(HTTPStatus.NOT_FOUND, "User does not have an associated site.")
+        site_obj = Table.Site(id="TemporarySiteID")
 
     return create_token_advance(form_data, user_obj, site_obj)
 
