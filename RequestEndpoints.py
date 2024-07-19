@@ -19,6 +19,7 @@ limiter = Limiter(key_func=get_remote_address)
 class requestAccountModel(BaseModel):
     companyName: str
     email: EmailStr
+    phone: str
     userType: int
 
 
@@ -96,6 +97,12 @@ async def request_Account(request: Request, data: requestAccountModel, db_sessio
     requestAccount_email_check = (await db_session.execute(stmt)).scalar()
     if requestAccount_email_check:
         return
+    
+    #check if phone number is in the table
+    stmt = select(Table.RequestAccount).where(Table.RequestAccount.phone == data.phone)
+    requestAccount_phone_check = (await db_session.execute(stmt)).scalar()
+    if requestAccount_phone_check:
+        return
 
     #check if the usertype is correct
     #stmt = select(Table.UserType).where(Table.UserType.Name == data.userType)
@@ -114,6 +121,7 @@ async def request_Account(request: Request, data: requestAccountModel, db_sessio
         Table.RequestAccount(
             companyName=data.companyName,
             email=data.email,
+            phone=data.phone,
             userType=userType.id
         )
     )

@@ -181,6 +181,7 @@ class RequestAccount(Base):
     id = Column(Integer, primary_key=True)
     companyName = Column(String)
     email = Column(String)
+    phone = Column(String)
     userType = Column(Integer, ForeignKey("UserType.id"))
 
 class Image(Base):
